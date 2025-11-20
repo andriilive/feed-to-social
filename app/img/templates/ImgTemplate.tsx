@@ -1,5 +1,6 @@
 import deepmerge from "deepmerge";
-import type {ImageProps} from "next/image";
+import React, {type CSSProperties} from 'react';
+import type {ImageProps} from 'next/image';
 
 const imgTemplatePresets = [
   'DEFAULT',
@@ -9,93 +10,85 @@ const imgTemplatePresets = [
 type ImgTemplatePreset = typeof imgTemplatePresets[number];
 
 type ImgTemplateProps = {
-  preset?: ImgTemplatePreset
+  preset?: ImgTemplatePreset;
+  img?: ImageProps['src'];
+  children?: React.ReactNode;
+} & React.HTMLAttributes<HTMLElement>;
+
+type Config = React.HTMLAttributes<HTMLDivElement> & {
+  brand: { logo: string; watermark: string };
+  [key: string]: unknown;
 };
 
-type ImageTempalteConfigProps = React.HTMLAttributes<HTMLDivElement> & {
-  brand: {
-    logo: string,
-    watermark: string,
-  },
-  [key: string]: unknown
-}
-
-// config
-const imgTemplateConfig: Record<
-  ImgTemplatePreset,
-  ImageTempalteConfigProps
-> = {
+const imgTemplateConfig: Record<ImgTemplatePreset, Config> = {
   DEFAULT: {
-    brand: {
-      watermark: 'WATERMARK',
-      logo: 'LOGO',
-    },
-    style: {
-      background: 'black',
-      color: 'white',
-    },
+    brand: {watermark: 'WATERMARK', logo: 'BRAND'},
+    style: {background: 'black', color: 'white'},
   },
   YELLOW: {
-    brand: {
-      watermark: 'WATERMARK 2',
-      logo: 'LOGO 2',
-    },
-    style: {
-      background: 'yellow',
-      color: 'black',
-    },
+    brand: {watermark: 'WATERMARK 2', logo: 'BRAND 2'},
+    style: {background: 'yellow', color: 'black'},
   },
 };
 
-const ROOT_STYLE: React.CSSProperties = {
-    fontSize: 128,
-    fontFamily: 'Open Sans, sans-serif',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+// inlined styles (converted from the CSS)
+const ROOT_STYLE: CSSProperties = {
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+  padding: '32px 80px',
+  display: 'flex',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  flexDirection: 'column',
+  position: 'relative',
 };
 
-type Props = ImgTemplateProps & Omit<React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>, 'style'> & {
-  img?: ImageProps['src'],
-  children?: React.ReactNode,
+const IMG_STYLE: CSSProperties = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  zIndex: -1,
+  opacity: 0.5,
 };
 
-const ImgTemplate: React.FunctionComponent<Props> = ({
-  preset = 'DEFAULT',
-  img,
-  ...props
-}) => {
+const HEADER_STYLE: CSSProperties = {
+  fontSize: 128,
+  fontWeight: 700
+};
 
+const ARTICLE_STYLE: CSSProperties = {
+  fontSize: 70,
+  lineHeight: 1.45,
+  maxWidth: '80%',
+}
+
+const FOOTER_STYLE: CSSProperties = {fontSize: 52, opacity: 0.5};
+
+const ImgTemplate: React.FC<ImgTemplateProps> = ({preset = 'DEFAULT', img, children, ...props}) => {
   const {brand, ...presetProps} = imgTemplateConfig[preset];
 
-  const mergedProps = deepmerge(
-    {style: ROOT_STYLE},
-    presetProps,
-  );
+  // merge preset props and incoming props (nested style merged)
+  const mergedProps = deepmerge<React.HTMLAttributes<HTMLElement>>(presetProps as any, props as any);
 
-  const PADDING = 42;
-  const PADDING_LEFT = PADDING + PADDING * 0.4;
+  // extract style, compose final style with ROOT_STYLE and ensure display:flex
+  const {style: mergedStyle, ...restProps} = mergedProps;
+  const finalStyle: CSSProperties = {...ROOT_STYLE, ...(mergedStyle as CSSProperties || {}), display: 'flex'};
 
   return (
-    <div {...mergedProps} {...props}>
-      <div style={{position: "absolute", top: PADDING, left: PADDING_LEFT,}}>
-        {brand.logo}
-      </div>
-      {img && (
-        <img src={img.toString()} alt="Dynamic Image" style={{
-          position: "absolute",
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          opacity: 0.25,
-        }} />
-      )}
-      <div style={{position: "absolute", fontSize: 52, bottom: PADDING, left: PADDING_LEFT, opacity: 0.5,}}>
+    <section {...(restProps as React.HTMLAttributes<HTMLElement>)} style={finalStyle}>
+      <header style={HEADER_STYLE}>{brand.logo}</header>
+      {img && <img src={img.toString()} alt="bg" style={IMG_STYLE}/>}
+      <article style={ARTICLE_STYLE}>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </article>
+      <footer style={FOOTER_STYLE}>
         {brand.watermark}
-      </div>
-    </div>
+      </footer>
+    </section>
   );
 };
 

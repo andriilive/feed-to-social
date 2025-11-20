@@ -1,7 +1,6 @@
+import {loadFonts} from "@/app/img/templates/fonts";
 import ImgTemplate from "@/app/img/templates/ImgTemplate";
 import {ImageResponse} from 'next/og'
-import {readFile} from 'node:fs/promises'
-import {join} from 'node:path'
 import type {ReactElement} from "react";
 
 // Image metadata
@@ -14,24 +13,10 @@ export const size = {
 export const contentType = 'image/png'
 
 export async function GET() {
-
-  // Font loading, process.cwd() is Next.js project directory
-  const openSans = await readFile(
-    join(process.cwd(), 'node_modules/@fontsource/open-sans/files/open-sans-latin-400-normal.woff')
-  );
-
   try {
     return new ImageResponse(ImgTemplate({}) as ReactElement, {
       ...size,
-      fonts:
-        [
-          {
-            name: 'Open Sans',
-            data: openSans,
-            style: 'normal',
-            weight: 400,
-          },
-        ]
+      fonts: await loadFonts(),
     })
   } catch (e) {
     console.log(`${JSON.stringify(e)}`)
