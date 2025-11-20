@@ -1,3 +1,4 @@
+import type {ImageSizeType, ImgForm} from "@/app/img";
 import deepmerge from "deepmerge";
 import React, {type CSSProperties} from 'react';
 import type {ImageProps} from 'next/image';
@@ -11,7 +12,9 @@ type ImgTemplatePreset = typeof imgTemplatePresets[number];
 
 type ImgTemplateProps = {
   preset?: ImgTemplatePreset;
-  img?: ImageProps['src'];
+  img?: Pick<ImageProps, 'src'> & {
+    imgForm: ImgForm
+  };
   children?: React.ReactNode;
 } & React.HTMLAttributes<HTMLElement>;
 
