@@ -1,4 +1,4 @@
-import type {ImageSizeType, ImgForm} from "@/app/img";
+import type {ImgForm} from "@/app/img";
 import deepmerge from "deepmerge";
 import React, {type CSSProperties} from 'react';
 import type {ImageProps} from 'next/image';
@@ -10,11 +10,14 @@ const imgTemplatePresets = [
 
 type ImgTemplatePreset = typeof imgTemplatePresets[number];
 
+export type ImgTemplateImageProp = {
+  src: string
+  imgForm: ImgForm
+};
+
 type ImgTemplateProps = {
   preset?: ImgTemplatePreset;
-  img?: Pick<ImageProps, 'src'> & {
-    imgForm: ImgForm
-  };
+  img?: ImgTemplateImageProp;
   children?: React.ReactNode;
 } & React.HTMLAttributes<HTMLElement>;
 
@@ -69,6 +72,12 @@ const ARTICLE_STYLE: CSSProperties = {
   maxWidth: '80%',
 }
 
+const ARTICLE_VERTICAL_STYLE: CSSProperties = {
+  fontSize: 48,
+  lineHeight: 1.4,
+  maxWidth: '95%',
+}
+
 const FOOTER_STYLE: CSSProperties = {fontSize: 52, opacity: 0.5};
 
 const ImgTemplate: React.FC<ImgTemplateProps> = ({preset = 'DEFAULT', img, children, ...props}) => {
@@ -84,8 +93,8 @@ const ImgTemplate: React.FC<ImgTemplateProps> = ({preset = 'DEFAULT', img, child
   return (
     <section {...(restProps as React.HTMLAttributes<HTMLElement>)} style={finalStyle}>
       <header style={HEADER_STYLE}>{brand.logo}</header>
-      {img && <img src={img.toString()} alt="bg" style={IMG_STYLE}/>}
-      <article style={ARTICLE_STYLE}>
+      {img && <img src={img.src} alt="bg" style={IMG_STYLE}/>}
+      <article style={img && img.imgForm === 'story' ? ARTICLE_VERTICAL_STYLE : ARTICLE_STYLE}>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
       </article>
       <footer style={FOOTER_STYLE}>

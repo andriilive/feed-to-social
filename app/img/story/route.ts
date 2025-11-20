@@ -1,21 +1,19 @@
-import {getImgTypeUtils, type ImgForm} from "@/app/img";
+import {getImgUtils, type ImgForm} from "@/app/img";
 import ImgTemplate from "@/components/ImgTemplate";
 import {ImageResponse} from 'next/og'
 import type {ReactElement} from "react";
 
 const IMG_FORM: ImgForm = 'story';
 
-const {size, contentType, responseOptions} = await getImgTypeUtils(IMG_FORM)
+const {size, contentType, responseOptions, img} = await getImgUtils(IMG_FORM)
 
 export async function GET() {
   try {
 
     return new ImageResponse(
       ImgTemplate({
-        preset: 'DEFAULT', img: {
-          src: '/',
-          imgForm: IMG_FORM
-        }
+        preset: 'DEFAULT',
+        img: img
       }) as ReactElement,
       responseOptions
     )
