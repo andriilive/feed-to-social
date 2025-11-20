@@ -1,5 +1,5 @@
-import {loadFonts} from "@/app/img/templates/fonts";
-import ImgTemplate from "@/app/img/templates/ImgTemplate";
+import {loadFonts} from "@/lib/fonts";
+import ImgTemplate from "@/components/ImgTemplate";
 import {ImageResponse} from 'next/og'
 import type {ReactElement} from "react";
 
